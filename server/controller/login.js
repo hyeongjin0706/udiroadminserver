@@ -18,7 +18,6 @@ export async function get(req, res) {
 }
 
 export async function login(req, res) {
-    console.log("들어옴");
     const {admin_id, admin_pw} = req.body;
     const admin = await(adminRepository.login(admin_id, admin_pw));
 

@@ -73,7 +73,7 @@ export async function searchByIdx(user_idx) {
 }
 
 // 회원 정보 수정
-export async function updateUser(user_idx) {
+export async function updateUser(user_idx, user_name, user_id, user_pw, user_email, user_phone, user_area) {
     return User.findByPk(user_idx).then((user) => {
         user.user_name = user_name;
         user.user_id = user_id;
