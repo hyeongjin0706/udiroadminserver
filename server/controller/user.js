@@ -4,7 +4,7 @@ import * as userRepository from "../data/user/user.js";
 import {config} from "../config.js";
 
 export async function getAll(req, res) {
-    const users = userRepository.getAll();
+    const users = await userRepository.getAll();
 
     res.status(200).json(users);
 }
