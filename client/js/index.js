@@ -10,7 +10,6 @@ fetch('http://localhost:9090/auth/', {
         if (response.ok) {
             response.json().then(function (data) {
                 for (const user of data) {
-                    console.log("들어옴");
                     user_tbody.innerHTML += `<tr>
                     <td class="table-plus">
                         <div class="name-avatar d-flex align-items-center">
@@ -51,6 +50,7 @@ fetch('http://localhost:9090/auth/', {
                         role="dialog"
                         aria-labelledby="myLargeModalLabel"
                         aria-hidden="true"
+                        onclick="test(${user.user_id})"
                     >
                         <div class="modal-dialog modal-lg modal-dialog-centered">
                             <div class="modal-content">
@@ -63,44 +63,42 @@ fetch('http://localhost:9090/auth/', {
                                         class="close"
                                         data-dismiss="modal"
                                         aria-hidden="true"
+                                        onclick='refresh()'
                                     >
                                         ×
                                     </button>
                                 </div>	
                                 <div class="modal-body">
                                     <table class="data-table table nowrap reverseTable">
-                                        <thead>
-                                            <tr>
-                                                <td>번호</td>
-                                                <td>${user.user_idx}</td>
-                                            </tr>
-                                        </thead>
                                         <tbody>
                                             <tr>
+                                                <td>번호</td>
+                                                <td class="user_idx">${user.user_idx}</td>
+                                            </tr>
+                                            <tr>
                                                 <td>이름</td>
-                                                <td id="name">${user.user_name}</td>
-                                                <td><button onclick="editField('name')">수정</button></td>
-                                                </tr>
-                                                <tr>
-                                                    <td>아이디</td>
-                                                    <td id="id">${user.user_id}</td>
-                                                    <td><button onclick="editField('id')">수정</button></td>
-                                                </tr>
-                                                <tr>
-                                                    <td>비밀번호</td>
-                                                    <td id="password">********</td>
-                                                    <td><button onclick="editField('password')">수정</button></td>
-                                                </tr>
-                                                <tr>
-                                                    <td>이메일</td>
-                                                    <td id="email">${user.user_email}</td>
-                                                    <td><button onclick="editField('email')">수정</button></td>
-                                                </tr>
-                                                <tr>
-                                                    <td>휴대폰번호</td>
-                                                    <td id="phone">${user.user_phone}</td>
-                                                    <td><button onclick="editField('phone')">수정</button></td>
-                                                </tr>
+                                                <td class="user_name">${user.user_name}</td>
+                                                <td><button onclick="editField('user_name')">수정</button></td>
+                                            </tr>
+                                            <tr>
+                                                <td>아이디</td>
+                                                <td class="user_id">${user.user_id}</td>
+                                                <td><button onclick="editField('user_id')">수정</button></td>
+                                            </tr>
+                                            <tr>
+                                                <td>비밀번호</td>
+                                                <td class="user_pw">********</td>
+                                                <td><button onclick="editField('user_pw')">수정</button></td>
+                                            </tr>
+                                            <tr>
+                                                <td>이메일</td>
+                                                <td class="user_email">${user.user_email}</td>
+                                                <td><button onclick="editField('user_email')">수정</button></td>
+                                            </tr>
+                                            <tr>
+                                                <td>휴대폰번호</td>
+                                                <td class="user_phone">${user.user_phone}</td>
+                                                <td><button onclick="editField('user_phone')">수정</button></td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -120,10 +118,11 @@ fetch('http://localhost:9090/auth/', {
                                         type="button"
                                         class="btn btn-secondary"
                                         data-dismiss="modal"
+                                        onclick='refresh()'
                                     >
                                         Close
                                     </button>
-                                    <button type="button" class="btn btn-primary">
+                                    <button type="button" class="btn btn-primary" onclick='updateUser(${user.user_id})'>
                                         Save changes
                                     </button>
                                 </div>
@@ -132,7 +131,6 @@ fetch('http://localhost:9090/auth/', {
                         </div>
                     </td>
                 </tr>`
-                    
                 }
             });
         } else {
@@ -143,9 +141,132 @@ fetch('http://localhost:9090/auth/', {
     })
     .catch(function (error) {
         console.error(error);
-        alert('회원정보를 불러오는 도중에 오류가 발생하였습니다'); // 로그인 요청 실패 시 알림 표시
+        alert('회원정보를 불러오는 도중에 오류가 발생하였습니다');
 });
 
-async function deleteData() {
-    console.log();
+async function deleteData(user_idx) {
+    await fetch(`http://localhost:9090/auth/${user_idx}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(function (response) {
+        if (response.ok) {
+            response.json().then(function (data) {
+                alert(data);
+                window.location.reload();
+            })
+        }
+        else {
+            alert("회원 삭제 실패!"); // 로그인 실패 시 알림 표시
+        }
+    })
+    .catch(function (error) {
+        console.error(error);
+        alert('회원 삭제 실패!'); // 로그인 요청 실패 시 알림 표시
+    });
+}
+
+async function updateUser(id){
+    const user_idx = id.querySelector('.user_idx').innerText;
+
+    const user_name = id.querySelector('.user_name').innerText;
+
+    const user_id = id.querySelector('.user_id').innerText;
+
+    const user_pw = id.querySelector('.user_pw').innerText;
+
+    const user_email = id.querySelector('.user_email').innerText;
+    
+    const user_phone = id.querySelector('.user_phone').innerText;
+
+    console.log(user_idx, user_name, user_id, user_pw, user_email, user_phone);
+
+    await fetch(`http://localhost:9090/auth/${user_idx}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            user_name,
+            user_id,
+            user_pw,
+            user_email,
+            user_phone
+        })
+    })
+    .then(function (response) {
+        if (response.ok) {
+            response.json().then(function (data) {
+                alert(data);
+                window.location.reload();
+            })
+        }
+        else {
+            alert("회원 수정 실패!"); // 로그인 실패 시 알림 표시
+        }
+    })
+    .catch(function (error) {
+        console.error(error);
+        alert('회원 수정 실패!'); // 로그인 요청 실패 시 알림 표시
+    });
+}
+
+function test(id) {
+    const user_name = id.querySelector('.user_name');
+    user_name.id = 'user_name';
+
+    const user_id = id.querySelector('.user_id');
+    user_id.id = 'user_id';
+
+    const user_pw = id.querySelector('.user_pw');
+    user_pw.id = 'user_pw';
+
+    const user_email = id.querySelector('.user_email');
+    user_email.id = 'user_email';
+    
+    const user_phone = id.querySelector('.user_phone');
+    user_phone.id = 'user_phone';
+}
+
+function refresh() {
+    window.location.reload();
+}
+
+async function addUser() {
+    const user_name = document.getElementById('add_name').value;
+    const user_id = document.getElementById('add_id').value;
+    const user_pw = document.getElementById('add_pw').value;
+    const user_email = document.getElementById('add_email').value;
+    const user_phone = document.getElementById('add_phone').value;
+
+    await fetch(`http://localhost:9090/auth/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            user_name,
+            user_id,
+            user_pw,
+            user_email,
+            user_phone
+        })
+    })
+    .then(function (response) {
+        if (response.ok) {
+            response.json().then(function (data) {
+                alert(data);
+                window.location.reload();
+            })
+        }
+        else {
+            alert("회원 추가 실패!"); // 로그인 실패 시 알림 표시
+        }
+    })
+    .catch(function (error) {
+        console.error(error);
+        alert('회원 추가 실패!'); // 로그인 요청 실패 시 알림 표시
+    });
 }
